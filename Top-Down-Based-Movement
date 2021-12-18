@@ -1,0 +1,66 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerMovement : MonoBehaviour
+{
+    public float moveSpeed;
+    public bool inDialogue;
+
+    [HideInInspector]
+    public Rigidbody2D rb2d;
+    Vector2 moveDir;
+    Animator anim;
+    SpriteRenderer sprRenderer;
+    [HideInInspector]
+    public AudioSource audioSource;
+
+    void Start()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+        anim = GetComponent<Animator>();
+        sprRenderer = GetComponent<SpriteRenderer>();
+        audioSource = GetComponent<AudioSource>();
+    }
+
+    void Update()
+    {
+        if(!inDialogue)
+            playerInput();
+    }
+
+    private void FixedUpdate()
+    {
+        if(!inDialogue)
+            playerMoveActual();
+    }
+
+    void playerInput()
+    {
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveY = Input.GetAxisRaw("Vertical");
+
+        if(moveX < 0)
+            sprRenderer.flipX = true;
+        else if(moveX > 0)
+            sprRenderer.flipX = false;
+
+        if (moveX != 0 || moveY != 0)
+        {
+            if(!audioSource.isPlaying)
+                audioSource.Play();
+            anim.SetBool("isWalking", true);
+        }    
+        else
+        {
+            audioSource.Stop();
+            anim.SetBool("isWalking", false);
+        }   
+        moveDir = new Vector2(moveX, moveY).normalized;
+    }
+
+    void playerMoveActual()
+    {
+        rb2d.velocity = new Vector2(moveDir.x * moveSpeed, moveDir.y * moveSpeed);
+    }
+}
